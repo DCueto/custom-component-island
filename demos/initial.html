@@ -13,7 +13,7 @@
 <body>
   <h1>Initial island demo</h1>
   <mini-island>
-    <p>Hello future island</p>
+    <p>Hello island</p>
 
     <template data-island>
       <script type="module">
@@ -21,6 +21,18 @@
       </script>
     </template>
 
+  </mini-island>
+
+  <a style="display:inline-block; padding-bottom: 100vh;" href="#mini-island-visible">Scroll Down</a>
+
+  <mini-island client:visible id="mini-island-visible">
+    <p>Hello island with lazy hydration</p>
+
+    <template data-island>
+      <script type="module">
+        console.warn("This is a WARNING from an island with lazy hydration so when it's visible on viewport will be rendered");
+      </script>
+    </template>
   </mini-island>
 </body>
 </html>

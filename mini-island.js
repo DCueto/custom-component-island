@@ -11,6 +11,7 @@ class MiniIsland extends HTMLElement {
   // custom element method that is invoked when our custom element is attached to the DOM
   async connectedCallback() {
     await this.hydrate();
+    await this.printConditions();
   }
 
   hydrate() {
@@ -38,7 +39,53 @@ class MiniIsland extends HTMLElement {
       node.replaceWith(node.content);
     }
   }
+
+  printConditions(){
+    console.log(this);
+    console.log( 'getConditions() value from Conditions class', Conditions.getConditions(this) );
+  }
 }
+
+// conditions for hydrating component
+class Conditions {
+  static map = {
+    idle: Conditions.waitForIdle,
+    visible: Conditions.waitForVisible,
+    media: Conditions.waitForMedia,
+  }
+
+  static waitForIdle() {
+    return new Promise( (resolve) => resolve() );
+  }
+
+  static waitForVisible() {
+    return new Promise( (resolve) => resolve() );
+  }
+
+  static waitForMedia() {
+    return new Promise( (resolve) => resolve() );
+  }
+
+  /* returns a key:value representing the condition:attribute of mini-island attr
+    * Return examples
+      * condition:attribute for client:visible => { visible: "" }
+      * condition:attribute for client:media="(max-width: 400px)" => { media: "(max-width: 400px)" }
+  */
+  static getConditions(node) {
+    let result = {};
+
+    for (const condition of Object.keys(Conditions.map)) {
+      // console.log( "Condition from map property of Conditions class", condition );
+
+      if (node.hasAttribute(`client:${condition}`)) {
+        // if has that condition attribute into that html node, creates a property into result object with that condition key name and it's value in html tag attribute
+        result[condition] = node.getAttribute(`client:${condition}`);
+      }
+    }
+    return result;
+  }
+}
+
 
 // checks if browser supports native custom elements
 if ('customElements' in window) {
