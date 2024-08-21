@@ -14,17 +14,43 @@ class MiniIsland extends HTMLElement {
     await this.printConditions();
   }
 
-  hydrate() {
-    const relevantChildTemplates = this.getTemplates();
+  async hydrate() {
 
-    console.log( relevantChildTemplates );
+    // array of promises to be resolved before hydration
+    const conditions = [];
 
-    if ( relevantChildTemplates instanceof NodeList && relevantChildTemplates.length > 0 ){
-      this.replaceTemplates(relevantChildTemplates);
-      return;
+    // get conditions for the current island element node
+    let conditionsAttributeMap = Conditions.getConditions(this);
+
+    for (const condition in conditionsAttributeMap){
+      // retrieves method function that returns a promise from map property object
+      const conditionFn = Conditions.map[condition];
+
+      if (conditionFn) {
+        console.log( conditionFn );
+
+        // invokes the condition function with the condition value and the current island node, so it'll return the promise
+        const conditionPromise = conditionFn( conditionsAttributeMap[condition], this );
+        // then includes this promise into our conditions promises array
+        conditions.push(conditionPromise);
+      }
+
+      console.log(conditions);
+      
+      // awaits for resolving all promises and then replace the templates content
+      await Promise.all(conditions);
+
+      const relevantChildTemplates = this.getTemplates();
+
+      console.log( relevantChildTemplates );
+
+      if ( relevantChildTemplates instanceof NodeList && relevantChildTemplates.length > 0 ){
+        this.replaceTemplates(relevantChildTemplates);
+        return;
+      }
+
+      console.log("There's no template tags into your mini-island element. Implement a <template> tag for rendering hydrated content");
     }
-
-    console.log("There's no template tags into your mini-island element. Implement a <template> tag for rendering hydrated content");
   }
 
   getTemplates() {
@@ -43,6 +69,7 @@ class MiniIsland extends HTMLElement {
   printConditions(){
     console.log(this);
     console.log( 'getConditions() value from Conditions class', Conditions.getConditions(this) );
+    Conditions.hasConditions(this);
   }
 }
 
@@ -83,6 +110,15 @@ class Conditions {
       }
     }
     return result;
+  }
+
+  static hasConditions(node) {
+    const conditionsAttributeMap = Conditions.getConditions(node);
+
+    console.log( Object.keys(conditionsAttributeMap) );
+
+    // if has at least 1 condition then returns true
+    return Object.keys(conditionsAttributeMap).length > 0;
   }
 }
 
