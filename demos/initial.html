@@ -20,6 +20,17 @@
         console.warn('This is a WARNING from an Island');
       </script>
     </template>
+  </mini-island>
+
+
+  <mini-island client:idle>
+    <p>Hello island with idle condition</p>
+
+    <template data-island>
+      <script type="module">
+        console.warn('This is a WARNING from an Island with idle condition (executes when all resources are loaded and browser isnt busy)');
+      </script>
+    </template>
 
   </mini-island>
 

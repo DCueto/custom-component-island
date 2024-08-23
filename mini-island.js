@@ -22,12 +22,18 @@ class MiniIsland extends HTMLElement {
     // get conditions for the current island element node
     let conditionsAttributeMap = Conditions.getConditions(this);
 
+    // triggers and stop execution only if there isn't any condition defined into mini-island => default behavior
+    if(Object.keys(conditionsAttributeMap).length === 0 ){
+      console.warn("NO CONDITIONS", conditions);
+      this.replaceTemplates();
+      return;
+    }
+
     for (const condition in conditionsAttributeMap){
       // retrieves method function that returns a promise from map property object
       const conditionFn = Conditions.map[condition];
 
       if (conditionFn) {
-        // console.log( conditionFn );
 
         // invokes the condition function with the condition value and the current island node, so it'll return the promise
         const conditionPromise = conditionFn( conditionsAttributeMap[condition], this );
@@ -35,21 +41,10 @@ class MiniIsland extends HTMLElement {
         conditions.push(conditionPromise);
       }
 
-      // console.log(conditions);
-
       // awaits for resolving all promises and then replace the templates content
       await Promise.all(conditions);
+      this.replaceTemplates();
 
-      const relevantChildTemplates = this.getTemplates();
-
-      console.log( relevantChildTemplates );
-
-      if ( relevantChildTemplates instanceof NodeList && relevantChildTemplates.length > 0 ){
-        this.replaceTemplates(relevantChildTemplates);
-        return;
-      }
-
-      console.log("There's no template tags into your mini-island element. Implement a <template> tag for rendering hydrated content");
     }
   }
 
@@ -58,19 +53,25 @@ class MiniIsland extends HTMLElement {
   }
 
   // iterates each template and replaces the <template> tag with its inner HTML content
-  replaceTemplates(templates) {
-    for (const node of templates) {
-      // console.log('Node from templates', node);
-      // console.log('Node template content', node.content);
-      node.replaceWith(node.content);
+  replaceTemplates() {
+    const relevantChildTemplates = this.getTemplates();
+
+    console.log( relevantChildTemplates );
+
+    if ( relevantChildTemplates instanceof NodeList && relevantChildTemplates.length > 0 ){
+      for (const node of relevantChildTemplates) {
+        node.replaceWith(node.content);
+      }
+      return;
     }
+    console.log("There's no template tags into your mini-island element. Implement a <template> tag for rendering hydrated content");
   }
 
-  printConditions(){
-    console.log(this);
-    console.log( 'getConditions() value from Conditions class', Conditions.getConditions(this) );
-    Conditions.hasConditions(this);
-  }
+  // printConditions(){
+  //   console.log(this);
+  //   console.log( 'getConditions() value from Conditions class', Conditions.getConditions(this) );
+  //   Conditions.hasConditions(this);
+  // }
 }
 
 // conditions for hydrating component
@@ -82,7 +83,35 @@ class Conditions {
   }
 
   static waitForIdle() {
-    return new Promise( (resolve) => resolve() );
+    const onLoad = new Promise((resolve) => {
+
+      if (document.readyState !== "complete"){
+
+        window.addEventListener("load", () => {
+          // when the whole document and it's dependent resources loaded
+          resolve();
+        },
+        // remove event at first invocation
+        { once: true }
+        );
+      } else {
+        resolve();
+      }
+    });
+
+    const onIdle = new Promise((resolve) => {
+      // if browser has requestIdleCallback support
+      if ("requestIdleCallback" in window) {
+        // requestIdleCallback() is invoked when there isn't latency-critical events so it's executed when browser isn't busy
+        requestIdleCallback(() => resolve());
+      } else {
+        resolve();
+      }
+    });
+
+
+
+    return Promise.all([onIdle, onLoad]);
   }
 
   static waitForVisible(noop, el) {
