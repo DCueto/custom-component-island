@@ -11,7 +11,7 @@ class MiniIsland extends HTMLElement {
   // custom element method that is invoked when our custom element is attached to the DOM
   async connectedCallback() {
     await this.hydrate();
-    await this.printConditions();
+    // await this.printConditions();
   }
 
   async hydrate() {
@@ -27,7 +27,7 @@ class MiniIsland extends HTMLElement {
       const conditionFn = Conditions.map[condition];
 
       if (conditionFn) {
-        console.log( conditionFn );
+        // console.log( conditionFn );
 
         // invokes the condition function with the condition value and the current island node, so it'll return the promise
         const conditionPromise = conditionFn( conditionsAttributeMap[condition], this );
@@ -35,8 +35,8 @@ class MiniIsland extends HTMLElement {
         conditions.push(conditionPromise);
       }
 
-      console.log(conditions);
-      
+      // console.log(conditions);
+
       // awaits for resolving all promises and then replace the templates content
       await Promise.all(conditions);
 
@@ -85,8 +85,28 @@ class Conditions {
     return new Promise( (resolve) => resolve() );
   }
 
-  static waitForVisible() {
-    return new Promise( (resolve) => resolve() );
+  static waitForVisible(noop, el) {
+    if (!("IntersectionObserver" in window)) {
+      return;
+    }
+
+    return new Promise( (resolve) => {
+      let observer = new IntersectionObserver((entries) => {
+        let [entry] = entries;
+        console.log("entry from entries array (IO)", entry);
+
+        // if element is visible
+        if (entry.isIntersecting) {
+          // remove observer
+          observer.unobserve(entry.target);
+
+          resolve();
+        }
+      });
+
+      // set the observer to island element
+      observer.observe(el);
+    });
   }
 
   static waitForMedia() {
