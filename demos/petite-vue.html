@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vue mini-island demo</title>
+  <title>Petite-vue island demo</title>
 
   <script type="module">
     import "../mini-island.js";
@@ -12,8 +12,8 @@
 </head>
 <body>
   
-  <h1>Vue using mini-island web component</h1>
-  <mark>This is a vue counter</mark>
+  <h1>Petite-vue using mini-island web component</h1>
+  <mark>This is a petite-vue counter</mark>
 
   <p>
     <strong>Resize your browser to match the media query:</strong>
@@ -22,11 +22,11 @@
   <p>By default, this button does not work if your size of screen is bigger than 400px</p>
 
   <mini-island client:media="(max-width: 400px)">
-    <div id="vue-app">
+    <div id="vue-app" v-scope="{ count: 0 }">
       <button @click="count++">
         <div>
           <span>➕ </span>
-          <strong>Vue</strong>
+          <strong>Petite-vue</strong>
           <div>
             <span v-html="count">0</span>
             <span>-</span>
@@ -39,11 +39,9 @@
     <!-- Loads Vue and mounts our app -->
     <template data-island>
       <script type="module">
-        import { createApp } from "https://unpkg.com/vue@3.2.36/dist/vue.esm-browser.prod.js";
+        import { createApp } from "https://unpkg.com/petite-vue@0.4.1/dist/petite-vue.es.js";
 
-        createApp({
-          data: () => ({ count: 0 }),
-        }).mount("#vue-app");
+        createApp().mount("#vue-app");
       </script>
     </template>
   </mini-island>
