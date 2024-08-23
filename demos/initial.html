@@ -21,6 +21,16 @@
       </script>
     </template>
   </mini-island>
+
+  <mini-island client:media="(max-width: 400px)">
+    <p>Hello island</p>
+
+    <template data-island>
+      <script type="module">
+        console.warn("THIS IS A WARNING FROM AN ISLAND WITH MEDIA QUERY");
+      </script>
+    </template>
+  </mini-island>
   
   <!-- Large image 14MB for testing mini-island with idle condition -->
   <img src="https://eoimages.gsfc.nasa.gov/images/imagerecords/73000/73751/world.topo.bathy.200407.3x21600x21600.D2.jpg" width="600px" alt="NASA large size image"/>

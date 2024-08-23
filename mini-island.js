@@ -136,8 +136,24 @@ class Conditions {
     });
   }
 
-  static waitForMedia() {
-    return new Promise( (resolve) => resolve() );
+  static waitForMedia(query) {
+
+    // this object is in case there isn't query condition or matchMedia isn't supported in browser
+    let queryList = { matches: true, };
+
+    if (query && "matchMedia" in window)
+    {
+      queryList = window.matchMedia(query);
+      console.log(queryList);
+    }
+
+    if (queryList.matches) return;
+
+    return new Promise( (resolve) => {
+      queryList.addEventListener('change', (e) => {
+        e.matches && resolve();
+      });
+    });
   }
 
   /* returns a key:value representing the condition:attribute of mini-island attr
