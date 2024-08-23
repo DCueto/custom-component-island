@@ -137,22 +137,50 @@ class Conditions {
   }
 
   static waitForMedia(query) {
-
-    // this object is in case there isn't query condition or matchMedia isn't supported in browser
-    let queryList = { matches: true, };
-
-    if (query && "matchMedia" in window)
-    {
-      queryList = window.matchMedia(query);
-      console.log(queryList);
+    // checks if there is any query and matchMedia is compatible in browser
+    if (!query || !("matchMedia" in window)){
+      return Promise.resolve();
     }
 
-    if (queryList.matches) return;
+    const queryList = window.matchMedia(query);
+    console.log(queryList);
+    // if on loading component island query is coincident, then returns the promise resolved
+    if (queryList.matches) {
+      return Promise.resolve();
+    };
 
+    // if not matches then return a promise adding an event for listening on resizing window
     return new Promise( (resolve) => {
-      queryList.addEventListener('change', (e) => {
-        e.matches && resolve();
-      });
+
+      const evHandler = (e) => {
+        if (e.matches) {
+          try {
+            // chrome & firefox
+            queryList.removeEventListener('change', evHandler);
+          } catch (err1) {
+            try {
+              // safari
+              queryList.removeListener(evHandler);
+            } catch (err2) {
+              console.error(err2);
+            }
+          }
+          resolve();
+        }
+      }
+
+      try {
+        // try Chrome & Firefox
+        queryList.addEventListener('change', evHandler);
+      } catch (err) {
+        try {
+          // Safari
+          queryList.addListener(evHandler);
+        } catch (err2) {
+          // Exception
+          console.error(err2);
+        }
+      }
     });
   }
 
