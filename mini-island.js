@@ -56,8 +56,6 @@ class MiniIsland extends HTMLElement {
   replaceTemplates() {
     const relevantChildTemplates = this.getTemplates();
 
-    console.log( relevantChildTemplates );
-
     if ( relevantChildTemplates instanceof NodeList && relevantChildTemplates.length > 0 ){
       for (const node of relevantChildTemplates) {
         node.replaceWith(node.content);
